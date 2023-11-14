@@ -1,6 +1,8 @@
 package ts
 
 import (
+	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -12,8 +14,6 @@ import (
 type MockTestFunction func(ctrl *gomock.Controller) []interface{}
 
 type ArrangeFunction func(args ...interface{}) []interface{}
-
-type ActFunction func(args ...interface{}) []interface{}
 
 type TestCase struct {
 	Name        string
@@ -27,7 +27,7 @@ type TestCasesSuite struct {
 	suite.Suite
 }
 
-func (s *TestCasesSuite) RunTest(fun ActFunction, cases ...TestCase) {
+func (s *TestCasesSuite) RunTest(fun any, cases ...TestCase) {
 	RunTest(s.T(), fun, cases...)
 }
 
@@ -95,7 +95,7 @@ func checkForCorrectnessPanicError(t *testing.T, msg any, expected TestExpected,
 	assert.Failf(t, "Panic error testcase: ", "%s %v", caseName, msg)
 }
 
-func runTestCase(t *testing.T, test TestCase, fun ActFunction, ctrl *gomock.Controller) {
+func runTestCase(t *testing.T, test TestCase, fun any, ctrl *gomock.Controller) {
 	t.Helper()
 
 	defer func(t *testing.T, test TestCase) {
@@ -117,12 +117,13 @@ func runTestCase(t *testing.T, test TestCase, fun ActFunction, ctrl *gomock.Cont
 		args = test.ArrangeCase(args)
 	}
 
-	res := fun(args...)
+	res, err := RunFunction(args, fun)
+	assert.NoError(t, err, "Catch error when bind args to testing function")
 
 	assertCase(t, res, test.Expected, test.Name)
 }
 
-func RunTest(t *testing.T, fun ActFunction, cases ...TestCase) {
+func RunTest(t *testing.T, fun any, cases ...TestCase) {
 	t.Helper()
 
 	ctrl := gomock.NewController(t)
@@ -142,4 +143,52 @@ func ToTestArgs(args ...interface{}) []interface{} {
 
 func TTA(args ...interface{}) []interface{} {
 	return ToTestArgs(args...)
+}
+
+func RunFunction(args []interface{}, fun any) ([]interface{}, error) {
+	funValue := reflect.ValueOf(fun)
+	funType := funValue.Type()
+
+	if funType.Kind() != reflect.Func {
+		return nil, fmt.Errorf("testing function is not function type it is %s", funType.String())
+	}
+
+	numIn := funType.NumIn()
+	if numIn > len(args) {
+		return nil, fmt.Errorf("testing function must have minimum %d params. Have %d", numIn, len(args))
+	}
+	if numIn != len(args) && !funType.IsVariadic() {
+		return nil, fmt.Errorf("testing function must have %d params. Have %d", numIn, len(args))
+	}
+
+	in := make([]reflect.Value, len(args))
+	for i := 0; i < len(args); i++ {
+		var inType reflect.Type
+		if funType.IsVariadic() && i >= numIn-1 {
+			inType = funType.In(numIn - 1).Elem()
+		} else {
+			inType = funType.In(i)
+		}
+
+		argValue := reflect.ValueOf(args[i])
+		if !argValue.IsValid() {
+			return nil, fmt.Errorf("param[%d] of testing function must be %s. Have %s", i, inType, argValue.String())
+		}
+
+		argType := argValue.Type()
+		if argType.ConvertibleTo(inType) {
+			in[i] = argValue.Convert(inType)
+		} else {
+			return nil, fmt.Errorf("param[%d] of testing function must be %s. Have %s", i, inType, argType)
+		}
+	}
+
+	funcRes := funValue.Call(in)
+	res := make([]interface{}, len(funcRes))
+
+	for i, rs := range funcRes {
+		res[i] = rs.Interface()
+	}
+
+	return res, nil
 }

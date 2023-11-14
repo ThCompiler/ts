@@ -31,19 +31,11 @@ func sum(a, b int64) int64 {
 
 type SumSuite struct {
 	ts.TestCasesSuite
-	ActFunc func(args ...interface{}) []interface{}
-}
-
-func (s *SumSuite) SetupTest() {
-	s.ActFunc = func(args ...interface{}) []interface{} {
-		res := sum(args[0].(int64), args[1].(int64))
-		return []interface{}{res}
-	}
 }
 
 func (s *SumSuite) TestCorrectNumber() {
 	s.RunTest(
-		s.ActFunc,
+		sum,
 		ts.TestCase{
 			Name:     "Zero With One",
 			Args:     ts.TTA(int64(0), int64(1)),
@@ -78,4 +70,4 @@ This example is located in the `example` folder.
 
 - [ ] Add documentation.
 - [ ] Add Some feature to work with gmock (now, i has no idea how it will be work and be comfortable for using).
-- [ ] Improve the way to set the function under test.
+- [x] Improve the way to set the function under test.

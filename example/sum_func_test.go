@@ -8,19 +8,11 @@ import (
 
 type SumSuite struct {
 	ts.TestCasesSuite
-	ActFunc func(args ...interface{}) []interface{}
-}
-
-func (s *SumSuite) SetupTest() {
-	s.ActFunc = func(args ...interface{}) []interface{} {
-		res := sum(args[0].(int64), args[1].(int64))
-		return []interface{}{res}
-	}
 }
 
 func (s *SumSuite) TestCorrectNumber() {
 	s.RunTest(
-		s.ActFunc,
+		sum,
 		ts.TestCase{
 			Name:     "Zero With One",
 			Args:     ts.TTA(int64(0), int64(1)),
