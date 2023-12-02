@@ -11,22 +11,23 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+// MockTestFunction is a interface of function to initialize mocks for a test case
 type MockTestFunction func(ctrl *gomock.Controller) []interface{}
 
-type ArrangeFunction func(args ...interface{}) []interface{}
-
+// TestCase is a structure describing the test case
 type TestCase struct {
-	Name        string
-	Args        []interface{}
-	Expected    TestExpected
-	InitMocks   MockTestFunction
-	ArrangeCase ArrangeFunction
+	Name      string           // Name of test
+	Args      []interface{}    // Args of testing function
+	Expected  TestExpected     // Info about expected return of testing function
+	InitMocks MockTestFunction // For Mock initialization !!!future
 }
 
+// TestCasesSuite is a wrapper over a suite.Suite with added methods for run test cases.
 type TestCasesSuite struct {
 	suite.Suite
 }
 
+// RunTest is a function to run a list of test cases for the tested function
 func (s *TestCasesSuite) RunTest(fun any, cases ...TestCase) {
 	RunTest(s.T(), fun, cases...)
 }
@@ -113,16 +114,13 @@ func runTestCase(t *testing.T, test TestCase, fun any, ctrl *gomock.Controller) 
 		args = append(mocks, args...)
 	}
 
-	if test.ArrangeCase != nil {
-		args = test.ArrangeCase(args)
-	}
-
-	res, err := RunFunction(args, fun)
+	res, err := runFunction(args, fun)
 	assert.NoError(t, err, "Catch error when bind args to testing function")
 
 	assertCase(t, res, test.Expected, test.Name)
 }
 
+// RunTest is a function to run test cases for testing function out of TestCasesSuite
 func RunTest(t *testing.T, fun any, cases ...TestCase) {
 	t.Helper()
 
@@ -137,15 +135,18 @@ func RunTest(t *testing.T, fun any, cases ...TestCase) {
 	}
 }
 
+// ToTestArgs is a small function to convert a list of args to an array of []interfaces{}
+// It can be easier write ToTestArgs(a, b, c) then []interface{}{a, b, c}.
 func ToTestArgs(args ...interface{}) []interface{} {
 	return args
 }
 
+// TTA is a wrapper over a function ToTestArgs to shorten its name
 func TTA(args ...interface{}) []interface{} {
 	return ToTestArgs(args...)
 }
 
-func RunFunction(args []interface{}, fun any) ([]interface{}, error) {
+func runFunction(args []interface{}, fun any) ([]interface{}, error) {
 	funValue := reflect.ValueOf(fun)
 	funType := funValue.Type()
 
