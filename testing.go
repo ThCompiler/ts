@@ -60,7 +60,7 @@ func assertWithError(t *testing.T, res *[]interface{}, expected TestExpected, ca
 	}
 
 	if expected.MustErrorExpected().CheckError {
-		assert.Error(t, gottenError, "Testcase with name: %s", caseName)
+		require.Error(t, gottenError, "Testcase with name: %s", caseName)
 	} else {
 		checkForCorrectnessError(t, gottenError, expected, caseName)
 	}
@@ -72,10 +72,10 @@ func checkForCorrectnessError(t *testing.T, gottenError error, expected TestExpe
 	t.Helper()
 
 	if expected.MustErrorExpected().Error == nil {
-		assert.NoError(t, gottenError,
+		require.NoError(t, gottenError,
 			"Testcase with name: %s", caseName)
 	} else {
-		assert.ErrorIs(t, gottenError, expected.MustErrorExpected().Error,
+		require.ErrorIs(t, gottenError, expected.MustErrorExpected().Error,
 			"Testcase with name: %s", caseName)
 	}
 }
@@ -84,7 +84,7 @@ func checkForCorrectnessPanicError(t *testing.T, msg any, expected TestExpected,
 	t.Helper()
 
 	if expected.HavePanicError() {
-		assert.EqualValuesf(t, expected.MustPanicErrorExpected().Msg, msg, "Testcase with name: %s", caseName)
+		require.EqualValuesf(t, expected.MustPanicErrorExpected().Msg, msg, "Testcase with name: %s", caseName)
 
 		return
 	}
@@ -96,10 +96,10 @@ func checkForCorrectnessPanicError(t *testing.T, msg any, expected TestExpected,
 	assert.Failf(t, "Panic error testcase: ", "%s %v", caseName, msg)
 }
 
-func runTestCase(t *testing.T, test TestCase, fun any, ctrl *gomock.Controller) {
+func runTestCase(t *testing.T, test *TestCase, fun any, ctrl *gomock.Controller) {
 	t.Helper()
 
-	defer func(t *testing.T, test TestCase) {
+	defer func(t *testing.T, test *TestCase) {
 		t.Helper()
 
 		if r := recover(); r != nil {
@@ -115,7 +115,7 @@ func runTestCase(t *testing.T, test TestCase, fun any, ctrl *gomock.Controller) 
 	}
 
 	res, err := runFunction(args, fun)
-	assert.NoError(t, err, "Catch error when bind args to testing function")
+	require.NoError(t, err, "Catch error when bind args to testing function")
 
 	assertCase(t, res, test.Expected, test.Name)
 }
@@ -130,7 +130,7 @@ func RunTest(t *testing.T, fun any, cases ...TestCase) {
 	for _, cs := range cases {
 		cs := cs
 		t.Run(cs.Name, func(t *testing.T) {
-			runTestCase(t, cs, fun, ctrl)
+			runTestCase(t, &cs, fun, ctrl)
 		})
 	}
 }
@@ -158,11 +158,13 @@ func runFunction(args []interface{}, fun any) ([]interface{}, error) {
 	if numIn > len(args) {
 		return nil, fmt.Errorf("testing function must have minimum %d params. Have %d", numIn, len(args))
 	}
+
 	if numIn != len(args) && !funType.IsVariadic() {
 		return nil, fmt.Errorf("testing function must have %d params. Have %d", numIn, len(args))
 	}
 
 	in := make([]reflect.Value, len(args))
+
 	for i := 0; i < len(args); i++ {
 		var inType reflect.Type
 		if funType.IsVariadic() && i >= numIn-1 {

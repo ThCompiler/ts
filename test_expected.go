@@ -7,8 +7,9 @@ type TestPanicErrorExpected struct {
 
 // TestErrorExpected is a struct contained info about expected returns of tested function
 type TestErrorExpected struct {
-	CheckError bool  // indication that it is only necessary to check for an error, without checking for a match with the expected one
-	Error      error // expected error
+	CheckError bool // indication that it is only necessary to check
+	// for an error, without checking for a match with the expected one
+	Error error // expected error
 }
 
 // TestExpected is a struct contained info about expected returns of tested function
@@ -61,8 +62,9 @@ func TTVE(expedites ...interface{}) TestExpected {
 	return ToTestValuesExpected(expedites...)
 }
 
-// ToTestValuesExpectedWithNilError is a function to construct test exception with only waiting for the specified arguments
-// // and nil error as the result of the function under test
+// ToTestValuesExpectedWithNilError is a function to construct test exception with only waiting for
+//
+//	the specified arguments and nil error as the result of the function under test
 func ToTestValuesExpectedWithNilError(expedites ...interface{}) TestExpected {
 	return TestExpected{
 		PanicError: nil,
