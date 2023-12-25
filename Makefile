@@ -5,6 +5,6 @@ release:
 	git tag $(VERSION); \
 	git push origin $(VERSION)
 
-.PHONY: clean
+.PHONY: changelog
 changelog:
 	sh ./workflow/changes.sh $(VERSION) > CURRENT-CHANGELOG.md

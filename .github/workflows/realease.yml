@@ -22,8 +22,6 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ env.GO_VERSION }}
-      - name: build
-        run: make build
       - name: version
         run: echo "version=$(bash ./workflow/version.sh $(go run ./workflow/version.go))" >> $GITHUB_OUTPUT
         id: version
@@ -33,8 +31,6 @@ jobs:
         with:
           name: release-changelog
           path: ./CURRENT-CHANGELOG.md
-      - name: clean
-        run: make clean
     outputs:
       version: ${{ steps.version.outputs.version }}
   publish_release:
