@@ -3,6 +3,9 @@ name: Release new version
 env:
   GO_VERSION: 1.21
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
