@@ -39,7 +39,7 @@ jobs:
       version: ${{ steps.version.outputs.version }}
   publish_release:
     name: publish_release
-    needs: [prepare_changelog, build_release]
+    needs: prepare_changelog
     environment:
       name: app-release
     runs-on: ubuntu-latest
