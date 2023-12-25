@@ -10,6 +10,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'dev/*/*/main'
 
 jobs:
   prepare_changelog:

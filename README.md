@@ -7,7 +7,7 @@ That is simple wrap [testify's](https://github.com/stretchr/testify) Suite to wr
 It's some kind of experiment. 
 
 Support:
-* Check expected results ```ts.ToTestValuesExpected(expected ...interfaces{})``` or ```ts.TTVE(expected ...interfaces{})```.
+* Check expected results without error ```ts.ToTestValuesExpected(expected ...interfaces{})``` or ```ts.TTVE(expected ...interfaces{})```.
 * Check expected results with nil error ```ts.ToTestValuesExpectedWithNilError(expected ...interfaces{})``` 
 or ```ts.TTVEWNE(expected ...interfaces{})```.
 * Check expected errors (expected error as last returned parameters) .
