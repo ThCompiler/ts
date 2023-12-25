@@ -1,9 +1,9 @@
 package example
 
 import (
+	"github.com/ThCompiler/ts"
 	"github.com/stretchr/testify/suite"
 	"testing"
-	"ts"
 )
 
 type SumSuite struct {
