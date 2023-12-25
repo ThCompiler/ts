@@ -1,4 +1,4 @@
-module ts
+module github.com/ThCompiler/ts
 
 go 1.21
 
