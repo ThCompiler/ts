@@ -55,12 +55,12 @@ jobs:
       - name: tag
         run: make release VERSION=${{ needs.prepare_changelog.outputs.version }}
       - name: release
-        uses: actions/create-release@v1
+        uses: softprops/action-gh-release@v1
         id: create_release
         with:
           draft: true
           prerelease: false
-          release_name: Release ${{ needs.prepare_changelog.outputs.version }}
+          name: Release ${{ needs.prepare_changelog.outputs.version }}
           tag_name: ${{ needs.prepare_changelog.outputs.version }}
           body_path: ./CURRENT-CHANGELOG.md
         env:
